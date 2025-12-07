@@ -25,12 +25,13 @@ async def on_ready():
         print(f"スラッシュコマンドの同期に失敗しました: {e}")
 # ================================================================
 
-def create_dotted_qr(data: str, dot_size: int = 8, spacing: int = 14) -> Image.Image: # ◀️ 初期値も実用的な値に変更
-    """データからドットスタイルのQRコードImageオブジェクトを生成する"""
-    # 💡 Discordに特化した、シンプルでパフォーマンスの良い設定
+def create_dotted_qr(data: str) -> Image.Image: # ◀️ 引数を data のみにし、シンプルに
+    """データからドットスタイルのQRコードImageオブジェクトを生成する（スキャン成功率MAX設定）"""
+    
+    # 💡 QRコードの仕様設定 (高いエラー訂正レベルを使用)
     qr = qrcode.QRCode(
         version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_H, # 高いエラー訂正レベル
+        error_correction=qrcode.constants.ERROR_CORRECT_H, 
         box_size=1,
         border=4,
     )
@@ -40,10 +41,10 @@ def create_dotted_qr(data: str, dot_size: int = 8, spacing: int = 14) -> Image.I
     qr_matrix = qr.get_matrix()
     matrix_size = len(qr_matrix)
     
-    # 画像サイズを計算
-    # 💡 画質とスキャンしやすさが両立する、最適な比率を設定
-    optimal_dot_size = 8 # 点の直径を8ピクセルに固定
-    optimal_spacing = 10 # 間隔を10ピクセルに固定
+    # ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 究極のスキャン成功率設定 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+    # 目標：ドットの隙間を1ピクセルに抑える（最もスキャンしやすい円形設定）
+    optimal_spacing = 8  # ◀️ 間隔を8ピクセルに設定（マスの大きさ）
+    optimal_dot_size = 7 # ◀️ 直径を7ピクセルに設定（隙間が1ピクセルになるように最大化）
     
     img_width = matrix_size * optimal_spacing
     img_height = matrix_size * optimal_spacing
@@ -61,6 +62,7 @@ def create_dotted_qr(data: str, dot_size: int = 8, spacing: int = 14) -> Image.I
                 center_y = y * optimal_spacing + optimal_spacing // 2
                 
                 # 円を描画
+                # (左上、右下を計算：中心から (optimal_dot_size/2) を引く/足す)
                 left = center_x - optimal_dot_size // 2
                 top = center_y - optimal_dot_size // 2
                 right = center_x + optimal_dot_size // 2
@@ -116,6 +118,7 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
 
 # Botの起動
 bot.run(os.environ['DISCORD_BOT_TOKEN'])
+
 
 
 
