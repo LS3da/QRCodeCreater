@@ -25,7 +25,7 @@ async def on_ready():
         print(f"スラッシュコマンドの同期に失敗しました: {e}")
 # ================================================================
 
-def create_dotted_qr(data: str, dot_size: int = 10, spacing: int = 12) -> Image.Image:
+def create_dotted_qr(data: str, dot_size: int = 16, spacing: int = 12) -> Image.Image:
     """データからドットスタイルのQRコードImageオブジェクトを生成する"""
     # 💡 Discordに特化した、シンプルでパフォーマンスの良い設定
     qr = qrcode.QRCode(
@@ -112,6 +112,7 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
 
 # Botの起動
 bot.run(os.environ['DISCORD_BOT_TOKEN'])
+
 
 
 
