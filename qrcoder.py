@@ -9,6 +9,7 @@ import unicodedata
 import qrcode
 from PIL import Image
 import io
+from qrcode.image.styles import DotStyle, SquareStyle
 
 # 💡 Botの基本設定: 必要最小限の権限
 bot = commands.Bot(command_prefix=' ', intents=discord.Intents.default())
@@ -50,11 +51,12 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
         
         # 2. デザインの適用と画像生成
         if q_type.lower() == "dot":
-            # 💡 Dotスタイル（黒い点を打つ）
-            img = qr.make_image(image_factory=qrcode.image.styles.module.QRCodeDotImage)
+            # 💡 DotStyle クラスを直接使用する
+            img = qr.make_image(image_factory=DotStyle)
         else:
-            # 💡 それ以外（squareを含む）は、全てSquareスタイルとして扱う
-            img = qr.make_image(fill_color="black", back_color="white")
+            # 💡 SquareStyle クラス（または、そのままの書き方）
+            # Botが読み込みミスをしないように、SquareStyleも直接使う形式に修正
+            img = qr.make_image(image_factory=SquareStyle, fill_color="black", back_color="white")
             
         # 3. 画像をメモリに保存
         buffer = io.BytesIO()
@@ -77,4 +79,5 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
 
 # Botの起動
 bot.run(os.environ['DISCORD_BOT_TOKEN'])
+
 
