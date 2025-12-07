@@ -2,15 +2,16 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import os
+import random
+import re
+import asyncio
+import unicodedata
 import qrcode
 from PIL import Image
 import io
 
-# ======================= Botの基本設定 =======================
-# 💡 権限は、メッセージの読み書きと、ファイルのアップロードのみ
-#    intents=discord.Intents.default() で、必要最小限の権限を要求
+# 💡 Botの基本設定: 必要最小限の権限
 bot = commands.Bot(command_prefix=' ', intents=discord.Intents.default())
-# ================================================================
 
 # ======================= Bot起動時のイベント =======================
 @bot.event
@@ -34,7 +35,6 @@ async def on_ready():
 )
 async def createqr_slash(interaction: discord.Interaction, link: str, q_type: str = "square"):
     
-    # 💡 ephemeral=False で、全員に見えるようにする
     await interaction.response.defer(thinking=True, ephemeral=False)
     
     try:
@@ -48,12 +48,12 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
         qr.add_data(link)
         qr.make(fit=True)
         
-        # 2. デザインの適用
+        # 2. デザインの適用と画像生成
         if q_type.lower() == "dot":
             # 💡 Dotスタイル（黒い点を打つ）
             img = qr.make_image(image_factory=qrcode.image.styles.mode.QRCodeDotImage)
         else:
-            # 💡 デフォルトのSquareスタイル
+            # 💡 それ以外（squareを含む）は、全てSquareスタイルとして扱う
             img = qr.make_image(fill_color="black", back_color="white")
             
         # 3. 画像をメモリに保存
