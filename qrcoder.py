@@ -7,7 +7,7 @@ import re
 import asyncio
 import unicodedata
 import qrcode
-from PIL import Image
+from PIL import Image, ImageDraw
 import io
 
 # 💡 Botの基本設定: 必要最小限の権限
@@ -25,6 +25,49 @@ async def on_ready():
         print(f"スラッシュコマンドの同期に失敗しました: {e}")
 # ================================================================
 
+def create_dotted_qr(data: str, dot_size: int = 10, spacing: int = 12) -> Image.Image:
+    """データからドットスタイルのQRコードImageオブジェクトを生成する"""
+    # 💡 Discordに特化した、シンプルでパフォーマンスの良い設定
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H, # 高いエラー訂正レベル
+        box_size=1,
+        border=4,
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+    
+    qr_matrix = qr.get_matrix()
+    matrix_size = len(qr_matrix)
+    
+    # 画像サイズを計算
+    img_width = matrix_size * spacing
+    img_height = matrix_size * spacing
+    
+    # 画像を作成
+    img = Image.new('RGB', (img_width, img_height), 'white')
+    draw = ImageDraw.Draw(img)
+    
+    # QRコードの各モジュールを点として描画
+    for y in range(matrix_size):
+        for x in range(matrix_size):
+            if qr_matrix[y][x]:  # 黒いモジュール
+                # 円の中心座標
+                center_x = x * spacing + spacing // 2
+                center_y = y * spacing + spacing // 2
+                
+                # 円を描画
+                left = center_x - dot_size // 2
+                top = center_y - dot_size // 2
+                right = center_x + dot_size // 2
+                bottom = center_y + dot_size // 2
+                
+                draw.ellipse([left, top, right, bottom], fill='black')
+                
+    return img
+
+
+
 # ======================= ここからがスラッシュコマンドです =======================
 
 # /createqrコマンド：QRコードを生成
@@ -38,22 +81,14 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
     await interaction.response.defer(thinking=True, ephemeral=False)
     
     try:
-        # 1. QRコードジェネレーターの準備
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(link)
-        qr.make(fit=True)
-        
-        # 2. デザインの適用と画像生成
         if q_type.lower() == "dot":
-            # 💡 古い書き方 (mode) で、Dotスタイルを適用
-            img = qr.make_image(image_factory=qrcode.image.styles.mode.QRCodeDotImage)
+            # 💡 Botが自分で定義した関数を呼び出し、Dotスタイルを描かせる！
+            img = create_dotted_qr(link, dot_size=8, spacing=14)
         else:
-            # 💡 デフォルトのSquareスタイルを適用
+            # 💡 デフォルトのSquareスタイル
+            qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
+            qr.add_data(link)
+            qr.make(fit=True)
             img = qr.make_image(fill_color="black", back_color="white")
             
         # 3. 画像をメモリに保存
@@ -77,6 +112,7 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
 
 # Botの起動
 bot.run(os.environ['DISCORD_BOT_TOKEN'])
+
 
 
 
