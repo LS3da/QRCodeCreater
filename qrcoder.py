@@ -41,10 +41,10 @@ def create_dotted_qr(data: str) -> Image.Image: # ◀️ 引数を data のみ�
     qr_matrix = qr.get_matrix()
     matrix_size = len(qr_matrix)
     
-    # ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 究極のスキャン成功率設定 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
-    # 目標：ドットの隙間を1ピクセルに抑える（最もスキャンしやすい円形設定）
-    optimal_spacing = 8  # ◀️ 間隔を8ピクセルに設定（マスの大きさ）
-    optimal_dot_size = 7 # ◀️ 直径を7ピクセルに設定（隙間が1ピクセルになるように最大化）
+    # ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 物理接続モード設定 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+    # 💡 物理接続の鍵: dot_size と spacing を同じ値にする！
+    optimal_spacing = 8  # ◀️ マスの大きさ（間隔）
+    optimal_dot_size = 8 # ◀️ ドットの直径（間隔と一致させることで隙間をゼロにする）
     
     img_width = matrix_size * optimal_spacing
     img_height = matrix_size * optimal_spacing
@@ -62,7 +62,6 @@ def create_dotted_qr(data: str) -> Image.Image: # ◀️ 引数を data のみ�
                 center_y = y * optimal_spacing + optimal_spacing // 2
                 
                 # 円を描画
-                # (左上、右下を計算：中心から (optimal_dot_size/2) を引く/足す)
                 left = center_x - optimal_dot_size // 2
                 top = center_y - optimal_dot_size // 2
                 right = center_x + optimal_dot_size // 2
@@ -118,6 +117,7 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
 
 # Botの起動
 bot.run(os.environ['DISCORD_BOT_TOKEN'])
+
 
 
 
