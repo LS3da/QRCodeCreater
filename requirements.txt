@@ -1,0 +1,6 @@
+discord
+markovify
+janome
+google-generativeai
+Pillow
+packaging
