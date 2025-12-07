@@ -51,7 +51,7 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
         # 2. デザインの適用と画像生成
         if q_type.lower() == "dot":
             # 💡 Dotスタイル（黒い点を打つ）
-            img = qr.make_image(image_factory=qrcode.image.styles.mode.QRCodeDotImage)
+            img = qr.make_image(image_factory=qrcode.image.styles.module.QRCodeDotImage)
         else:
             # 💡 それ以外（squareを含む）は、全てSquareスタイルとして扱う
             img = qr.make_image(fill_color="black", back_color="white")
@@ -77,3 +77,4 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
 
 # Botの起動
 bot.run(os.environ['DISCORD_BOT_TOKEN'])
+
