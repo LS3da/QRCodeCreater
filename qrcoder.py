@@ -9,7 +9,6 @@ import unicodedata
 import qrcode
 from PIL import Image
 import io
-from qrcode.image.styles import DotStyle, SquareStyle
 
 # 💡 Botの基本設定: 必要最小限の権限
 bot = commands.Bot(command_prefix=' ', intents=discord.Intents.default())
@@ -79,6 +78,7 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
 
 # Botの起動
 bot.run(os.environ['DISCORD_BOT_TOKEN'])
+
 
 
 
