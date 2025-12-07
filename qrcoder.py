@@ -25,7 +25,7 @@ async def on_ready():
         print(f"スラッシュコマンドの同期に失敗しました: {e}")
 # ================================================================
 
-def create_dotted_qr(data: str, dot_size: int = 24, spacing: int = 12) -> Image.Image:
+def create_dotted_qr(data: str, dot_size: int = 8, spacing: int = 14) -> Image.Image: # ◀️ 初期値も実用的な値に変更
     """データからドットスタイルのQRコードImageオブジェクトを生成する"""
     # 💡 Discordに特化した、シンプルでパフォーマンスの良い設定
     qr = qrcode.QRCode(
@@ -41,8 +41,12 @@ def create_dotted_qr(data: str, dot_size: int = 24, spacing: int = 12) -> Image.
     matrix_size = len(qr_matrix)
     
     # 画像サイズを計算
-    img_width = matrix_size * spacing
-    img_height = matrix_size * spacing
+    # 💡 画質とスキャンしやすさが両立する、最適な比率を設定
+    optimal_dot_size = 8 # 点の直径を8ピクセルに固定
+    optimal_spacing = 10 # 間隔を10ピクセルに固定
+    
+    img_width = matrix_size * optimal_spacing
+    img_height = matrix_size * optimal_spacing
     
     # 画像を作成
     img = Image.new('RGB', (img_width, img_height), 'white')
@@ -53,14 +57,14 @@ def create_dotted_qr(data: str, dot_size: int = 24, spacing: int = 12) -> Image.
         for x in range(matrix_size):
             if qr_matrix[y][x]:  # 黒いモジュール
                 # 円の中心座標
-                center_x = x * spacing + spacing // 2
-                center_y = y * spacing + spacing // 2
+                center_x = x * optimal_spacing + optimal_spacing // 2
+                center_y = y * optimal_spacing + optimal_spacing // 2
                 
                 # 円を描画
-                left = center_x - dot_size // 2
-                top = center_y - dot_size // 2
-                right = center_x + dot_size // 2
-                bottom = center_y + dot_size // 2
+                left = center_x - optimal_dot_size // 2
+                top = center_y - optimal_dot_size // 2
+                right = center_x + optimal_dot_size // 2
+                bottom = center_y + optimal_dot_size // 2
                 
                 draw.ellipse([left, top, right, bottom], fill='black')
                 
@@ -82,8 +86,8 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
     
     try:
         if q_type.lower() == "dot":
-            # 💡 Botが自分で定義した関数を呼び出し、Dotスタイルを描かせる！
-            img = create_dotted_qr(link, dot_size=8, spacing=14)
+            # 💡 Botに内蔵された、最適設定でDotスタイルを描かせる！
+            img = create_dotted_qr(link) 
         else:
             # 💡 デフォルトのSquareスタイル
             qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
@@ -112,6 +116,7 @@ async def createqr_slash(interaction: discord.Interaction, link: str, q_type: st
 
 # Botの起動
 bot.run(os.environ['DISCORD_BOT_TOKEN'])
+
 
 
 
